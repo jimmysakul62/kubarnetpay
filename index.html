@@ -887,14 +887,11 @@ title.style.color=dataKampung[nama].warna;
 }
 
 setHeaderBackground();
-
-loadPelanggan();
-
 generateTagihanBulanan();
 simpanDB();
 dashboard();
 grafikPendapatan();
-simpanPelanggan()
+loadPelanggan();
 
 }
 
@@ -1126,6 +1123,15 @@ noHp:document.getElementById("hp").value,
 paket:document.getElementById("paket").value,
 alamat:document.getElementById("alamat").value
 };
+
+let namaEl = document.getElementById("nama");
+
+if(!namaEl){
+console.log("form belum terbuka");
+return;
+}
+
+let nama = namaEl.value;
 
 fetch(API_URL,{
 method:"POST",
