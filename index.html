@@ -1234,7 +1234,7 @@ data.append("hp",document.getElementById("hp").value);
 data.append("paket",document.getElementById("paket").value);
 data.append("alamat",document.getElementById("alamat").value);
 
-let res = await fetch(API + "?" + data);
+let res = await fetch(API + "?" + data.toString());
 
 let hasil = await res.json();
 
