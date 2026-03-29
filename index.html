@@ -1208,24 +1208,25 @@ content.innerHTML=`
 
 async function simpanPelanggan(){
 
-let nama = document.getElementById("nama").value;
-let kampung = kampungAktif;
-
 let data = new URLSearchParams();
-data.append("aksi","simpanPelanggan");
-data.append("nama",nama);
-data.append("kampung",kampung);
 
-let res = await fetch(API_URL,{
+data.append("aksi","simpanPelanggan");
+data.append("id",document.getElementById("id").value);
+data.append("nama",document.getElementById("nama").value);
+data.append("hp",document.getElementById("hp").value);
+data.append("paket",document.getElementById("paket").value);
+data.append("alamat",document.getElementById("alamat").value);
+
+let res = await fetch(API,{
 method:"POST",
-body:new URLSearchParams(data)
+body:data
 });
 
-let json = await res.json();
-console.log(json);
+let hasil = await res.json();
+
+console.log(hasil);
 
 }
-
 function cariPelanggan(){
 
 let keyword = searchPelanggan.value.toLowerCase();
