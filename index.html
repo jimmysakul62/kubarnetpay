@@ -385,7 +385,7 @@ padding:25px;
 font-size:16px;
 }
 
-.popup-buttons{
+.popup-s{
 padding:15px;
 display:flex;
 justify-content:center;
@@ -548,7 +548,7 @@ color:white;
 Login: <span id="namaUser"></span>
 </div>
 
-<button class="toggle-btn" onclick="toggleSidebar()">❯</button>
+< class="toggle-btn" onclick="toggleSidebar()">❯</>
 
 <a class="menu-item" onclick="gantiKampung('AWAI')">
 <span class="icon">🏠</span>
@@ -1241,6 +1241,9 @@ let hasil = await res.json();
 console.log(hasil);
 
 }
+
+simpanPelanggan()
+  
 function cariPelanggan(){
 
 let keyword = searchPelanggan.value.toLowerCase();
