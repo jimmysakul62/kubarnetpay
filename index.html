@@ -1013,6 +1013,23 @@ console.error("FETCH ERROR:",err);
 
 }
 
+function simpanPelanggan(){
+
+let formData = new FormData();
+formData.append("aksi","simpanPelanggan");
+formData.append("nama",document.getElementById("nama").value);
+
+fetch(API,{
+method:"POST",
+body:formData
+})
+.then(r=>r.json())
+.then(res=>{
+alert("Data tersimpan");
+});
+
+}
+  
 async function getPelanggan(){
 
 let res = await fetch(API_URL,{
