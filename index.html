@@ -166,7 +166,7 @@ text-shadow:
 }
 
 .header-waktu{
-position:absolute;
+position:relative;
 right:5px;
 bottom:8px;
 text-align:center;
@@ -542,7 +542,10 @@ color:white;
 </div>
 
 <div class="dashboard">
-<canvas id="chart" height="120"></canvas>
+</div>
+
+<div style="padding:10px;color:white;">
+Login: <span id="namaUser"></span>
 </div>
 
 <button class="toggle-btn" onclick="toggleSidebar()">❯</button>
@@ -598,11 +601,6 @@ color:white;
 
 <div class="header">
 
-<div class="header-info">
-<span id="tanggal"></span> | 
-<span id="jam"></span>
-</div>
-
 <div class="header-text">
 
 <div class="header-title" id="headerTitle">
@@ -612,6 +610,15 @@ KAMPUNG TONDOH
 <div class="header-subtitle">
 Database Management & Billing Payment
 </div>
+
+<div class="header-info">
+
+</div>
+
+<div class="header-waktu"></div>
+<span id="jam"></span>
+<span id="tanggal"></span>
+
 
 </div>
 
@@ -646,6 +653,8 @@ Database Management & Billing Payment
 
 <div id="content"></div>
 
+<canvas id="chart" height="50"></canvas>
+
 <div class="footer">
 ©2026 Vhel45.ArtDesign
 </div>
@@ -653,6 +662,14 @@ Database Management & Billing Payment
 <script>
 
 const API_URL="https://script.google.com/macros/s/AKfycby13hX5HkKHDW0jNyZC3dYdH8s0pyUDPUvZ4nmTXJWfh71te2rfDKK76NO0BVib7mwwgw/exec";
+
+let userLogin = JSON.parse(localStorage.getItem("login_user"));
+
+if(!userLogin){
+window.location.href="login.html";
+}
+
+let kampungAktif = userLogin.kampung;
 
 let session = localStorage.getItem("login_user");
 
@@ -680,7 +697,7 @@ let users = [
 username:"superadmin",
 password:"12345",
 role:"super",
-kampung:"ALL"
+kampung:"KUBARPAYNET"
 },
 
 {
@@ -743,6 +760,7 @@ warna:"#50D050"
 },
 
 AWAI:{
+nama:"AWAI",
 prefix:"AWI",
 wilayah:"20255",
 header:"img/awai.jpg",
@@ -750,6 +768,7 @@ warna:"#39FF14"
 },
 
 DEMPAR:{
+nama:"DEMPAR",
 prefix:"DMP",
 wilayah:"20254",
 header:"img/dempar.jpg",
@@ -757,6 +776,7 @@ warna:"#1F51FF"
 },
 
 LENDIAN:{
+nama:"LENDIAN",
 prefix:"LND",
 wilayah:"20253",
 header:"img/lendian.jpg",
@@ -764,6 +784,7 @@ warna:"#FF1493"
 },
 
 MARIMUN:{
+nama:"MARIMUN",
 prefix:"MRM",
 wilayah:"_2025_0",
 header:"img/marimun.jpg",
@@ -771,6 +792,7 @@ warna:"#A020F0"
 },
 
 MUARAJAWAQ:{
+nama:"MUARAJAWAQ",
 prefix:"MJW",
 wilayah:"20249",
 header:"img/muarajawaq.jpg",
@@ -778,6 +800,7 @@ warna:"#FFFF33"
 },
 
 MUUT:{
+nama:"MUUT",
 prefix:"MUT",
 wilayah:"20251",
 header:"img/muut.jpg",
@@ -785,6 +808,7 @@ warna:"#00FFFF"
 },
 
 TONDOH:{
+nama:"TONDOH",
 prefix:"TND",
 wilayah:"20250",
 header:"img/tondoh.jpg",
@@ -879,12 +903,22 @@ return;
 
 }
 
-let title=document.querySelector(".header-title");
+let title = document.querySelector(".header-title");
 
 if(title){
-title.innerText="KAMPUNG " + nama;
-title.style.color=dataKampung[nama].warna;
+
+let data = dataKampung[nama];
+
+if(!data){
+console.log("Kampung tidak ditemukan:", nama);
+return;
 }
+
+title.innerText = "KAMPUNG " + nama;
+title.style.color = data.warna;
+
+}
+
 
 setHeaderBackground();
 generateTagihanBulanan();
@@ -941,7 +975,6 @@ simpanPelanggan()
 let pelanggan=[];
 let pembayaran=[];
 
-let kampungAktif = userLogin.kampung;
 if(userLogin.role=="super"){
 kampungAktif="AWAI";
 }
@@ -1113,6 +1146,15 @@ content.innerHTML=`
 }
 
 function simpanPelanggan(){
+
+let namaEl = document.getElementById("nama");
+
+if(!namaEl){
+console.log("form belum terbuka");
+return;
+}
+
+let nama = namaEl.value;
 
 let data={
 aksi:"simpanPelanggan",
@@ -2472,25 +2514,33 @@ setHeaderBackground();
 
 window.onload = function(){
 
+document.getElementById("namaUser").innerText = userLogin.username;
+
 let sidebar = document.getElementById("sidebar");
 let btn = document.querySelector(".toggle-btn");
 
 let status = localStorage.getItem("sidebar");
 
-if(status=="collapsed"){
-
+if(status === "collapsed"){
 sidebar.classList.add("collapsed");
 btn.innerHTML="❯";
-
 }else{
-
 btn.innerHTML="❮";
+}
 
+if(userLogin.role == "admin"){
+gantiKampung(userLogin.kampung);
+}
+
+if(userLogin.role == "super"){
+gantiKampung("KUBARPAYNET");
 }
 
 initApp();
 setHeaderBackground();
 jamRealtime();
+loadPelanggan();
+
 }
 
 function logout(){
