@@ -661,7 +661,7 @@ Database Management & Billing Payment
 
 <script>
 
-const API_URL="https://script.google.com/macros/s/AKfycby13hX5HkKHDW0jNyZC3dYdH8s0pyUDPUvZ4nmTXJWfh71te2rfDKK76NO0BVib7mwwgw/exec";
+const API_URL="https://script.google.com/macros/s/AKfycbyiVbdOyDPBP_ALLdy0Y1ckgyM8ihZQsb1B0Rh6hwTi_O3z6ClG3u7kwwSgVnULGSk94A/exec";
 
 let userLogin = JSON.parse(localStorage.getItem("login_user"));
 
@@ -686,6 +686,8 @@ console.log(data);
 });
 
 let content=document.getElementById("content");
+
+let chartPendapatan = null;
 
 /* =====================
 DATABASE ADMIN
@@ -893,6 +895,20 @@ content.innerHTML=`
 
 }
 
+function tampilkanData(){
+
+let dataTampil;
+
+if(userLogin.kampung === "KUBARPAYNET"){
+dataTampil = semuaData;
+}else{
+dataTampil = semuaData.filter(d => d.kampung === userLogin.kampung);
+}
+
+renderTable(dataTampil);
+
+}
+
 function gantiKampung(nama){
 
 if(userLogin && userLogin.role=="admin" && userLogin.kampung!=nama){
@@ -981,20 +997,35 @@ kampungAktif="AWAI";
 
 async function loadPelanggan(){
 
-let url = API_URL+"?aksi=getPelanggan&kampung="+kampungAktif;
+try{
 
-let res = await fetch(url);
+let res = await fetch(API_URL+"?aksi=getPelanggan&kampung="+kampungAktif);
 
 let data = await res.json();
 
-pelanggan = data.map(p=>({
-no:p[0],
-id:p[1],
-nama:p[2],
-hp:p[3],
-paket:p[4],
-alamat:p[5]
-}));
+console.log("DATA:",data);
+
+}catch(err){
+
+console.error("FETCH ERROR:",err);
+
+}
+
+}
+
+async function getPelanggan(){
+
+let res = await fetch(API_URL,{
+method:"POST",
+body:new URLSearchParams({
+aksi:"getPelanggan",
+kampung:kampungAktif
+})
+});
+
+let data = await res.json();
+
+console.log(data);
 
 }
 
@@ -1004,6 +1035,36 @@ localStorage.setItem("pelanggan_"+kampungAktif,JSON.stringify(pelanggan));
 localStorage.setItem("pembayaran_"+kampungAktif,JSON.stringify(pembayaran));
 
 autoBackup();
+
+}
+
+function loadData(){
+
+fetch(API_URL)
+.then(r => r.json())
+.then(data => {
+
+let semuaData = data;
+
+console.log("USER LOGIN:", userLogin);
+console.log("KAMPUNG USER:", userLogin?.kampung);
+console.log("SEMUA DATA:", semuaData);
+
+let dataTampil;
+
+if(userLogin?.kampung === "KUBARPAYNET"){
+console.log("SUPERADMIN MODE");
+dataTampil = semuaData;
+}else{
+console.log("FILTER KAMPUNG:", userLogin.kampung);
+dataTampil = semuaData.filter(d => d.kampung === userLogin.kampung);
+}
+
+console.log("DATA TAMPIL:", dataTampil);
+
+renderTable(dataTampil);
+
+});
 
 }
 
@@ -1145,65 +1206,23 @@ content.innerHTML=`
 
 }
 
-function simpanPelanggan(){
+async function simpanPelanggan(){
 
-let namaEl = document.getElementById("nama");
+let nama = document.getElementById("nama").value;
+let kampung = kampungAktif;
 
-if(!namaEl){
-console.log("form belum terbuka");
-return;
-}
+let data = new URLSearchParams();
+data.append("aksi","simpanPelanggan");
+data.append("nama",nama);
+data.append("kampung",kampung);
 
-let nama = namaEl.value;
-
-let data={
-aksi:"simpanPelanggan",
-kampung:kampungAktif,
-id:document.getElementById("id").value,
-nama:document.getElementById("nama").value,
-noHp:document.getElementById("hp").value,
-paket:document.getElementById("paket").value,
-alamat:document.getElementById("alamat").value
-};
-
-fetch(API_URL,{
+let res = await fetch(API_URL,{
 method:"POST",
 body:new URLSearchParams(data)
-})
-.then(r=>r.json())
-.then(res=>{
-console.log(res);
 });
 
-}
-
-async function simpanPelangganAPI(data){
-
-await fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({
-aksi:"simpanPelanggan",
-kampung:kampungAktif,
-id:data.id,
-nama:data.nama,
-noHp:data.hp,
-paket:data.paket,
-alamat:data.alamat
-})
-});
-
-pelanggan.push(data);
-
-generateTagihanBulanan();
-
-simpanDB();
-
-bukaPopupInfo(
-"DATA BERHASIL",
-"Data pelanggan berhasil disimpan"
-);
-
-formPelanggan();
+let json = await res.json();
+console.log(json);
 
 }
 
@@ -2469,19 +2488,25 @@ jam+":"+menit+":"+detik+" "+zona;
 
 setInterval(jamRealtime,1000);
 
-function grafikPendapatan(){
+function grafikPendapatan(data){
 
-let dataBulan=[1200000,1400000,1600000,1800000,2000000];
+if(!data || !Array.isArray(data)){
+console.log("Data grafik kosong", data);
+return;
+}
 
-let ctx=document.getElementById("chart").getContext("2d");
+let labels = data.map(x => x.label);
+let values = data.map(x => x.total);
+
+let ctx = document.getElementById("chart");
 
 new Chart(ctx,{
-type:"line",
+type:"bar",
 data:{
-labels:["Jan","Feb","Mar","Apr","Mei"],
+labels:labels,
 datasets:[{
 label:"Pendapatan",
-data:dataBulan
+data:values
 }]
 }
 });
