@@ -90,22 +90,24 @@ let users=[
 
 function login(){
 
-let u=document.getElementById("username").value;
-let p=document.getElementById("password").value;
+let username = document.getElementById("username").value;
+let password = document.getElementById("password").value;
 
-let user=users.find(x=>x.username==u && x.password==p);
+let userLogin = users.find(u =>
+u.username === username &&
+u.password === password
+);
 
-if(user){
-
-localStorage.setItem("login_user",JSON.stringify(user));
-
-window.location="index.html";
-
-}else{
-
-alert("Username / Password salah");
-
+if(!userLogin){
+alert("Username atau password salah");
+return;
 }
+
+// simpan session login
+localStorage.setItem("login_user", JSON.stringify(userLogin));
+
+// pindah ke dashboard
+window.location.href="index.html";
 
 }
 
